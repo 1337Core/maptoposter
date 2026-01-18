@@ -23,10 +23,20 @@ Generate beautiful, minimalist map posters for any city in the world.
 ## Installation
 
 ```bash
+# Using uv (recommended)
+uv sync
+```
+
+```bash
+# Using pip
 pip install -r requirements.txt
 ```
 
 ## Usage
+
+```bash
+uv run python create_map_poster.py --city <city> --country <country> [options]
+```
 
 ```bash
 python create_map_poster.py --city <city> --country <country> [options]

@@ -275,15 +275,15 @@ def create_poster(city, country, point, dist, output_file):
     
     # 4. Typography using Roboto font
     if FONTS:
-        font_main = FontProperties(fname=FONTS['bold'], size=60)
-        font_top = FontProperties(fname=FONTS['bold'], size=40)
-        font_sub = FontProperties(fname=FONTS['light'], size=22)
+        font_main = FontProperties(fname=FONTS['bold'], size=44)
+        font_top = FontProperties(fname=FONTS['bold'], size=32)
+        font_sub = FontProperties(fname=FONTS['light'], size=20)
         font_coords = FontProperties(fname=FONTS['regular'], size=14)
     else:
         # Fallback to system fonts
-        font_main = FontProperties(family='monospace', weight='bold', size=60)
-        font_top = FontProperties(family='monospace', weight='bold', size=40)
-        font_sub = FontProperties(family='monospace', weight='normal', size=22)
+        font_main = FontProperties(family='monospace', weight='bold', size=44)
+        font_top = FontProperties(family='monospace', weight='bold', size=32)
+        font_sub = FontProperties(family='monospace', weight='normal', size=20)
         font_coords = FontProperties(family='monospace', size=14)
     
     spaced_city = "  ".join(list(city.upper()))
