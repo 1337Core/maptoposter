@@ -252,9 +252,13 @@ def create_poster(city, country, point, dist, output_file):
     # 3. Plot Layers
     # Layer 1: Polygons
     if water is not None and not water.empty:
-        water.plot(ax=ax, facecolor=THEME['water'], edgecolor='none', zorder=1)
+        water_polys = water[water.geometry.type.isin(['Polygon', 'MultiPolygon'])]
+        if not water_polys.empty:
+            water_polys.plot(ax=ax, facecolor=THEME['water'], edgecolor='none', zorder=1)
     if parks is not None and not parks.empty:
-        parks.plot(ax=ax, facecolor=THEME['parks'], edgecolor='none', zorder=2)
+        parks_polys = parks[parks.geometry.type.isin(['Polygon', 'MultiPolygon'])]
+        if not parks_polys.empty:
+            parks_polys.plot(ax=ax, facecolor=THEME['parks'], edgecolor='none', zorder=2)
     
     # Layer 2: Roads with hierarchy coloring
     print("Applying road hierarchy colors...")
@@ -275,24 +279,39 @@ def create_poster(city, country, point, dist, output_file):
     
     # 4. Typography using Roboto font
     if FONTS:
-        font_main = FontProperties(fname=FONTS['bold'], size=44)
-        font_top = FontProperties(fname=FONTS['bold'], size=32)
-        font_sub = FontProperties(fname=FONTS['light'], size=20)
+        font_main = FontProperties(fname=FONTS['bold'], size=60)
+        font_top = FontProperties(fname=FONTS['bold'], size=40)
+        font_sub = FontProperties(fname=FONTS['light'], size=22)
         font_coords = FontProperties(fname=FONTS['regular'], size=14)
     else:
         # Fallback to system fonts
-        font_main = FontProperties(family='monospace', weight='bold', size=44)
-        font_top = FontProperties(family='monospace', weight='bold', size=32)
-        font_sub = FontProperties(family='monospace', weight='normal', size=20)
+        font_main = FontProperties(family='monospace', weight='bold', size=60)
+        font_top = FontProperties(family='monospace', weight='bold', size=40)
+        font_sub = FontProperties(family='monospace', weight='normal', size=22)
         font_coords = FontProperties(family='monospace', size=14)
-    
-    spaced_city = "  ".join(list(city.upper()))
+
+    display_city = city
+    display_country = country
+    if ',' in city and country.strip().lower() in {
+        'usa',
+        'us',
+        'u.s.',
+        'u.s.a.',
+        'united states',
+        'united states of america',
+    }:
+        parts = [part.strip() for part in city.split(',') if part.strip()]
+        if len(parts) >= 2:
+            display_city = parts[0]
+            display_country = ", ".join(parts[1:])
+
+    spaced_city = "  ".join(list(display_city.upper()))
 
     # --- BOTTOM TEXT ---
     ax.text(0.5, 0.14, spaced_city, transform=ax.transAxes,
             color=THEME['text'], ha='center', fontproperties=font_main, zorder=11)
     
-    ax.text(0.5, 0.10, country.upper(), transform=ax.transAxes,
+    ax.text(0.5, 0.10, display_country.upper(), transform=ax.transAxes,
             color=THEME['text'], ha='center', fontproperties=font_sub, zorder=11)
     
     lat, lon = point
