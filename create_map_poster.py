@@ -213,7 +213,7 @@ def get_coordinates(city, country):
     else:
         raise ValueError(f"Could not find coordinates for {city}, {country}")
 
-def create_poster(city, country, point, dist, output_file):
+def create_poster(city, country, point, dist, output_file, width_in, height_in, dpi):
     print(f"\nGenerating map for {city}, {country}...")
     
     # Progress bar for data fetching
@@ -245,7 +245,7 @@ def create_poster(city, country, point, dist, output_file):
     
     # 2. Setup Plot
     print("Rendering map...")
-    fig, ax = plt.subplots(figsize=(12, 16), facecolor=THEME['bg'])
+    fig, ax = plt.subplots(figsize=(width_in, height_in), facecolor=THEME['bg'])
     ax.set_facecolor(THEME['bg'])
     ax.set_position([0, 0, 1, 1])
     
@@ -278,17 +278,18 @@ def create_poster(city, country, point, dist, output_file):
     create_gradient_fade(ax, THEME['gradient_color'], location='top', zorder=10)
     
     # 4. Typography using Roboto font
+    scale = height_in / 16
     if FONTS:
-        font_main = FontProperties(fname=FONTS['bold'], size=60)
-        font_top = FontProperties(fname=FONTS['bold'], size=40)
-        font_sub = FontProperties(fname=FONTS['light'], size=22)
-        font_coords = FontProperties(fname=FONTS['regular'], size=14)
+        font_main = FontProperties(fname=FONTS['bold'], size=60 * scale)
+        font_top = FontProperties(fname=FONTS['bold'], size=40 * scale)
+        font_sub = FontProperties(fname=FONTS['light'], size=22 * scale)
+        font_coords = FontProperties(fname=FONTS['regular'], size=14 * scale)
     else:
         # Fallback to system fonts
-        font_main = FontProperties(family='monospace', weight='bold', size=60)
-        font_top = FontProperties(family='monospace', weight='bold', size=40)
-        font_sub = FontProperties(family='monospace', weight='normal', size=22)
-        font_coords = FontProperties(family='monospace', size=14)
+        font_main = FontProperties(family='monospace', weight='bold', size=60 * scale)
+        font_top = FontProperties(family='monospace', weight='bold', size=40 * scale)
+        font_sub = FontProperties(family='monospace', weight='normal', size=22 * scale)
+        font_coords = FontProperties(family='monospace', size=14 * scale)
 
     display_city = city
     display_country = country
@@ -327,9 +328,9 @@ def create_poster(city, country, point, dist, output_file):
 
     # --- ATTRIBUTION (bottom right) ---
     if FONTS:
-        font_attr = FontProperties(fname=FONTS['light'], size=8)
+        font_attr = FontProperties(fname=FONTS['light'], size=8 * scale)
     else:
-        font_attr = FontProperties(family='monospace', size=8)
+        font_attr = FontProperties(family='monospace', size=8 * scale)
     
     ax.text(0.98, 0.02, "© OpenStreetMap contributors", transform=ax.transAxes,
             color=THEME['text'], alpha=0.5, ha='right', va='bottom', 
@@ -337,7 +338,7 @@ def create_poster(city, country, point, dist, output_file):
 
     # 5. Save
     print(f"Saving to {output_file}...")
-    plt.savefig(output_file, dpi=300, facecolor=THEME['bg'])
+    plt.savefig(output_file, dpi=dpi, facecolor=THEME['bg'])
     plt.close()
     print(f"✓ Done! Poster saved as {output_file}")
 
@@ -439,6 +440,9 @@ Examples:
     parser.add_argument('--country', '-C', type=str, help='Country name')
     parser.add_argument('--theme', '-t', type=str, default='feature_based', help='Theme name (default: feature_based)')
     parser.add_argument('--distance', '-d', type=int, default=29000, help='Map radius in meters (default: 29000)')
+    parser.add_argument('--width-in', type=float, default=12, help='Poster width in inches (default: 12)')
+    parser.add_argument('--height-in', type=float, default=16, help='Poster height in inches (default: 16)')
+    parser.add_argument('--dpi', type=int, default=300, help='Output DPI (default: 300)')
     parser.add_argument('--list-themes', action='store_true', help='List all available themes')
     
     args = parser.parse_args()
@@ -477,7 +481,16 @@ Examples:
     try:
         coords = get_coordinates(args.city, args.country)
         output_file = generate_output_filename(args.city, args.theme)
-        create_poster(args.city, args.country, coords, args.distance, output_file)
+        create_poster(
+            args.city,
+            args.country,
+            coords,
+            args.distance,
+            output_file,
+            args.width_in,
+            args.height_in,
+            args.dpi,
+        )
         
         print("\n" + "=" * 50)
         print("✓ Poster generation complete!")
